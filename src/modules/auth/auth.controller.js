@@ -9,16 +9,6 @@ const register = async (req, res, next) => {
   });
 };
 
-const verifyEmail = async (req, res) => {
-  const { token } = req.body || {};
-
-  const result = await authService.verifyEmail({ token });
-
-  res.status(200).json({
-    success: true,
-    ...result,
-  });
-};
 const login = async (req, res, next) => {
   const { refreshToken, ...response } = await authService.login({
     data: req.body,
@@ -50,4 +40,4 @@ const refreshToken = async (req, res) => {
   });
 };
 
-export { register, verifyEmail, login, logout, refreshToken };
+export { register, login, logout, refreshToken };

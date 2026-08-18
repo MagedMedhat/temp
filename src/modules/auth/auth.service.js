@@ -12,13 +12,7 @@ import {
 } from "../../utils/jwt.js";
 import { dummyHash, TOKEN_EXPIRATION } from "./auth.constants.js";
 const register = async ({ data }) => {
-  // if (data?.role === "doctor") {
-  //   const specialty = await Specialty.findById(
-  //     data?.doctorProfile?.specialty_id,
-  //   );
-  //   if (!specialty || !specialty.isActive || specialty.isDeleted)
-  //     throw new AppError("Invalid specialtyId", 400);
-  // }
+  
   const hashedPassword = await bcrypt.hash(data.password, 12);
 
   const { rawToken, hashedToken } = generateSecurityToken();
@@ -38,39 +32,8 @@ const register = async ({ data }) => {
     if (error?.code === 11000) throw new AppError("Email already exists", 409);
     throw error;
   }
-  // send email with rawToken to user.email for verification logic here
   return {
     message: "User registered successfully. Please verify your email.",
-  };
-};
-
-const verifyEmail = async ({ token }) => {
-  const hashedToken = hashToken(token);
-  const tokenRecord = await verificationCodeModel
-    .findOne({
-      token: hashedToken,
-      type: "email_verification",
-      expires_at: {
-        $gt: new Date(),
-      },
-    })
-    .populate("user_id");
-  let user = tokenRecord ? tokenRecord?.user_id : null;
-
-  if (!tokenRecord || !user)
-    throw new AppError("Invalid or expired verification token", 400);
-
-  if (user.is_verified) throw new AppError("Email already verified", 400);
-
-  user.is_verified = true;
-  await user.save();
-  await verificationCodeModel.deleteMany({
-    user_id: user._id,
-    type: "email_verification",
-  });
-  return {
-    success: true,
-    message: "Email verified successfully",
   };
 };
 
@@ -83,8 +46,6 @@ const login = async ({ data }) => {
 
   if (!user || !isMatch) throw new AppError("Invalid email or password", 401);
 
-  if (!user.is_verified)
-    throw new AppError("Please verify your email first.", 403);
 
   if (user.is_blocked)
     throw new AppError("Your account has been blocked.", 403);

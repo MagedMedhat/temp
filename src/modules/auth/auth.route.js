@@ -11,12 +11,6 @@ const router = express.Router();
 
 router.post("/register", validate(registerSchema), authController.register);
 
-router.post(
-  "/verify-email",
-  validate(verifyEmailSchema),
-  authController.verifyEmail,
-);
-
 router.post("/login", authController.login);
 
 router.post("/logout", authMiddleware, authController.logout);

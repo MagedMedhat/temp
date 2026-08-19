@@ -1,6 +1,18 @@
 import { Schema, model } from "mongoose";
 
-const PlanSchema = new Schema(
+export interface IPlan {
+  name: string;
+  job_post_limit: number | null;
+  price_monthly: number;
+  price_yearly: number;
+  is_featured: boolean;
+  has_direct_messaging: boolean;
+  has_premium_reports: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+const PlanSchema = new Schema<IPlan>(
   {
     name: { type: String, required: true, trim: true, unique: true },
     job_post_limit: { type: Number, default: null },
@@ -13,4 +25,4 @@ const PlanSchema = new Schema(
   { timestamps: true, versionKey: false },
 );
 
-export default model("Plan", PlanSchema);
+export default model<IPlan>("Plan", PlanSchema);

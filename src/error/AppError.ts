@@ -1,5 +1,6 @@
 export default class AppError extends Error {
-  constructor(message, status) {
+  status: number;
+  constructor(message: string, status?: number) {
     super(message);
     this.status = status || 500;
     Error.captureStackTrace(this, this.constructor);

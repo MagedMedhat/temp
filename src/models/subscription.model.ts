@@ -1,6 +1,20 @@
-import { Schema, model } from "mongoose";
+import { Schema, model, Types } from "mongoose";
 
-const SubscriptionSchema = new Schema(
+export type BillingCycle = "monthly" | "yearly";
+export type SubscriptionStatus = "active" | "expired" | "canceled";
+
+export interface ISubscription {
+  employer_id: Types.ObjectId;
+  plan_id: Types.ObjectId;
+  billing_cycle: BillingCycle;
+  status: SubscriptionStatus;
+  current_period_start: Date;
+  current_period_end: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+const SubscriptionSchema = new Schema<ISubscription>(
   {
     employer_id: {
       type: Schema.Types.ObjectId,
@@ -29,4 +43,4 @@ const SubscriptionSchema = new Schema(
   { timestamps: true, versionKey: false },
 );
 
-export default model("Subscription", SubscriptionSchema);
+export default model<ISubscription>("Subscription", SubscriptionSchema);

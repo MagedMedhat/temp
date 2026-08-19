@@ -1,6 +1,38 @@
-import { Schema, model } from "mongoose";
+import { Schema, model, Types } from "mongoose";
 
-const JobSchema = new Schema(
+export type WorkType = "remote" | "onsite" | "hybrid";
+export type ExperienceLevel = "entry" | "junior" | "mid" | "senior" | "lead";
+export type JobStatus =
+  | "draft"
+  | "pending_approval"
+  | "approved"
+  | "rejected"
+  | "expired"
+  | "closed";
+
+export interface IJob {
+  employer_id: Types.ObjectId;
+  category_id: Types.ObjectId;
+  technologies: Types.ObjectId[];
+  title: string;
+  description: string;
+  responsibilities?: string;
+  requirements?: string;
+  location?: string;
+  work_type: WorkType;
+  salary_min?: number;
+  salary_max?: number;
+  experience_level?: ExperienceLevel;
+  application_deadline: Date;
+  status: JobStatus;
+  rejection_reason?: string;
+  views_count: number;
+  applications_count: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+const JobSchema = new Schema<IJob>(
   {
     employer_id: {
       type: Schema.Types.ObjectId,
@@ -26,7 +58,7 @@ const JobSchema = new Schema(
     location: {
       type: String,
       trim: true,
-      required: function (this: { work_type?: string }): boolean {
+      required(this: IJob): boolean {
         return this.work_type !== "remote";
       },
     },
@@ -69,4 +101,4 @@ JobSchema.pre("validate", function () {
 JobSchema.index({ title: "text", description: "text" });
 JobSchema.index({ status: 1, createdAt: -1 });
 
-export default model("Job", JobSchema);
+export default model<IJob>("Job", JobSchema);

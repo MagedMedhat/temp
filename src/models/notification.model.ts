@@ -1,6 +1,25 @@
-import { Schema, model } from "mongoose";
+import { Schema, model, Types } from "mongoose";
 
-const NotificationSchema = new Schema(
+export type NotificationType =
+  | "job_approved"
+  | "job_rejected"
+  | "application_status_changed"
+  | "payment_completed"
+  | "payment_failed";
+
+export interface INotification {
+  user_id: Types.ObjectId;
+  type: NotificationType;
+  title: string;
+  content: string;
+  data?: Record<string, unknown>;
+  is_read: boolean;
+  read_at?: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+const NotificationSchema = new Schema<INotification>(
   {
     user_id: {
       type: Schema.Types.ObjectId,
@@ -28,4 +47,4 @@ const NotificationSchema = new Schema(
   { timestamps: true, versionKey: false },
 );
 
-export default model("Notification", NotificationSchema);
+export default model<INotification>("Notification", NotificationSchema);

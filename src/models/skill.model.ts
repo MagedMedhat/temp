@@ -1,10 +1,16 @@
 import { Schema, model } from "mongoose";
 
-const SkillSchema = new Schema(
+export interface ISkill {
+  name: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+const SkillSchema = new Schema<ISkill>(
   {
     name: { type: String, required: true, trim: true, unique: true },
   },
   { timestamps: true, versionKey: false },
 );
 
-export default model("Skill", SkillSchema);
+export default model<ISkill>("Skill", SkillSchema);

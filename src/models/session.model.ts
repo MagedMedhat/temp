@@ -1,6 +1,16 @@
-import { Schema, model } from "mongoose";
+import { Schema, model, Types } from "mongoose";
 
-const SessionSchema = new Schema(
+export interface ISession {
+  user_id: Types.ObjectId;
+  refresh_token: string;
+  expires_at: Date;
+  revoked_at: Date | null;
+  last_used_at: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+const SessionSchema = new Schema<ISession>(
   {
     user_id: {
       type: Schema.Types.ObjectId,
@@ -33,4 +43,4 @@ const SessionSchema = new Schema(
   },
 ).index({ expires_at: 1 }, { expireAfterSeconds: 0 });
 
-export default model("Session", SessionSchema);
+export default model<ISession>("Session", SessionSchema);

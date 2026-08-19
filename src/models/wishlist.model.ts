@@ -1,6 +1,13 @@
-import { Schema, model } from "mongoose";
+import { Schema, model, Types } from "mongoose";
 
-const WishlistSchema = new Schema(
+export interface IWishlist {
+  candidate_id: Types.ObjectId;
+  job_id: Types.ObjectId;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+const WishlistSchema = new Schema<IWishlist>(
   {
     candidate_id: {
       type: Schema.Types.ObjectId,
@@ -19,4 +26,4 @@ const WishlistSchema = new Schema(
 
 WishlistSchema.index({ candidate_id: 1, job_id: 1 }, { unique: true });
 
-export default model("Wishlist", WishlistSchema);
+export default model<IWishlist>("Wishlist", WishlistSchema);

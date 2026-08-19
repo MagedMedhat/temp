@@ -1,6 +1,21 @@
-import { Schema, model } from "mongoose";
+import { Schema, model, Types } from "mongoose";
 
-const PaymentSchema = new Schema(
+export type PaymentGateway = "paypal" | "stripe";
+export type PaymentStatus = "pending" | "completed" | "failed" | "refunded";
+
+export interface IPayment {
+  subscription_id: Types.ObjectId;
+  amount: number;
+  currency: string;
+  gateway: PaymentGateway;
+  gateway_transaction_id: string;
+  status: PaymentStatus;
+  paid_at?: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+const PaymentSchema = new Schema<IPayment>(
   {
     subscription_id: {
       type: Schema.Types.ObjectId,
@@ -26,4 +41,4 @@ const PaymentSchema = new Schema(
   { timestamps: true, versionKey: false },
 );
 
-export default model("Payment", PaymentSchema);
+export default model<IPayment>("Payment", PaymentSchema);

@@ -1,6 +1,15 @@
-import { Schema, model } from "mongoose";
+import { Schema, model, Types } from "mongoose";
 
-const CommentSchema = new Schema(
+export interface IComment {
+  job_id: Types.ObjectId;
+  user_id: Types.ObjectId;
+  content: string;
+  is_approved: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+const CommentSchema = new Schema<IComment>(
   {
     job_id: {
       type: Schema.Types.ObjectId,
@@ -19,4 +28,4 @@ const CommentSchema = new Schema(
   { timestamps: true, versionKey: false },
 );
 
-export default model("Comment", CommentSchema);
+export default model<IComment>("Comment", CommentSchema);

@@ -1,6 +1,42 @@
-import { Schema, model } from "mongoose";
+import { Schema, model, Types } from "mongoose";
 
-const EmployerProfileSchema = new Schema(
+export interface IEmployerProfile {
+  company_name: string;
+  company_logo?: string;
+  description?: string;
+  industry?: string;
+  website?: string;
+}
+
+export interface ICandidateSkill {
+  skill_id: Types.ObjectId;
+}
+
+export interface ICandidateProfile {
+  headline?: string;
+  bio?: string;
+  location?: string;
+  portfolio_url?: string;
+  resume?: string;
+  skills: ICandidateSkill[];
+  experience_level: "entry" | "junior" | "mid" | "senior" | "lead";
+}
+
+export type UserRole = "admin" | "employer" | "candidate";
+
+export interface IUser {
+  name: string;
+  email: string;
+  password: string;
+  role: UserRole;
+  employerProfile?: IEmployerProfile;
+  candidateProfile?: ICandidateProfile;
+  is_blocked: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+const EmployerProfileSchema = new Schema<IEmployerProfile>(
   {
     company_name: { type: String, required: true, trim: true },
     company_logo: String,
@@ -11,7 +47,7 @@ const EmployerProfileSchema = new Schema(
   { _id: false },
 );
 
-const CandidateSkillSchema = new Schema(
+const CandidateSkillSchema = new Schema<ICandidateSkill>(
   {
     skill_id: {
       type: Schema.Types.ObjectId,
@@ -22,7 +58,7 @@ const CandidateSkillSchema = new Schema(
   { _id: false },
 );
 
-const CandidateProfileSchema = new Schema(
+const CandidateProfileSchema = new Schema<ICandidateProfile>(
   {
     headline: { type: String, trim: true },
     bio: { type: String, trim: true, maxlength: 2000 },
@@ -39,7 +75,7 @@ const CandidateProfileSchema = new Schema(
   { _id: false },
 );
 
-const UserSchema = new Schema(
+const UserSchema = new Schema<IUser>(
   {
     name: { type: String, required: true, trim: true },
     email: {
@@ -57,13 +93,13 @@ const UserSchema = new Schema(
     },
     employerProfile: {
       type: EmployerProfileSchema,
-      required() {
+      required(this: IUser) {
         return this.role === "employer";
       },
     },
     candidateProfile: {
       type: CandidateProfileSchema,
-      required() {
+      required(this: IUser) {
         return this.role === "candidate";
       },
     },
@@ -81,4 +117,4 @@ UserSchema.pre("validate", function () {
   }
 });
 
-export default model("User", UserSchema);
+export default model<IUser>("User", UserSchema);

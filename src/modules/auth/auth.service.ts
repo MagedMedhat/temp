@@ -1,6 +1,5 @@
 import bcrypt from "bcrypt";
 import User from "../../models/user.model.js";
-import Specialty from "../../models/specialty.model.js";
 import Session from "../../models/session.model.js";
 
 import AppError from "../../error/AppError.js";
@@ -10,13 +9,14 @@ import {
   hashToken,
 } from "../../utils/jwt.js";
 import { dummyHash, TOKEN_EXPIRATION } from "./auth.constants.js";
+import type { RegisterInput } from "./auth.validation.js";
 
-const register = async ({ data }) => {
+const register = async ({ data }: { data: RegisterInput }) => {
   const hashedPassword = await bcrypt.hash(data.password, 12);
 
   try {
-    await User.create({ ...data, password: hashedPassword });
-  } catch (error) {
+    await User.create({ ...data, password: hashedPassword } as any);
+  } catch (error: any) {
     if (error?.code === 11000) throw new AppError("Email already exists", 409);
     throw error;
   }
@@ -25,7 +25,12 @@ const register = async ({ data }) => {
   };
 };
 
-const login = async ({ data }) => {
+interface LoginInput {
+  email: string;
+  password: string;
+}
+
+const login = async ({ data }: { data: LoginInput }) => {
   const { email, password } = data;
 
   const user = await User.findOne({ email }).lean();
@@ -44,29 +49,28 @@ const login = async ({ data }) => {
     expires_at: new Date(Date.now() + TOKEN_EXPIRATION.refresh_token),
   });
   const accessToken = generateAccessToken({
-    userId: user._id,
+    userId: user._id.toString(),
     role: user.role,
-    sessionId: session._id,
+    sessionId: session._id.toString(),
   });
 
   const profile =
-    user.role === "doctor" ? user.doctorProfile : user.patientProfile;
+    user.role === "employer" ? user.employerProfile : user.candidateProfile;
 
   return {
     accessToken,
     accessTokenExpiresIn: TOKEN_EXPIRATION.access_token / 1000,
     refreshToken: rawToken,
     user: {
-      id: user.id,
+      id: user._id,
       name: user.name,
       role: user.role,
-      contact_number: user.contact_number,
       profile,
     },
   };
 };
 
-const logout = async ({ sessionId }) => {
+const logout = async ({ sessionId }: { sessionId: string }) => {
   const result = await Session.updateOne(
     { _id: sessionId, revoked_at: null },
     { revoked_at: new Date() },
@@ -77,7 +81,7 @@ const logout = async ({ sessionId }) => {
   return true;
 };
 
-const refreshToken = async ({ refreshToken }) => {
+const refreshToken = async ({ refreshToken }: { refreshToken: string }) => {
   const hashedToken = hashToken(refreshToken);
 
   const session = await Session.findOne({
@@ -86,7 +90,7 @@ const refreshToken = async ({ refreshToken }) => {
     expires_at: {
       $gt: new Date(),
     },
-  }).populate("user_id");
+  }).populate<{ user_id: any }>("user_id");
 
   if (!session) throw new AppError("Invalid or expired refresh token", 401);
 
@@ -107,7 +111,7 @@ const refreshToken = async ({ refreshToken }) => {
 
   return {
     accessToken: generateAccessToken({
-      userId: user._id,
+      userId: user._id.toString(),
       role: user.role,
     }),
     accessTokenExpiresIn: TOKEN_EXPIRATION.access_token / 1000,
@@ -117,10 +121,10 @@ const refreshToken = async ({ refreshToken }) => {
       name: user.name,
       email: user.email,
       role: user.role,
-      contact_number: user.contact_number,
       profile:
-        user.role === "doctor" ? user.doctorProfile : user.patientProfile,
+        user.role === "employer" ? user.employerProfile : user.candidateProfile,
     },
   };
 };
+
 export { register, login, logout, refreshToken };

@@ -1,6 +1,29 @@
-import { Schema, model } from "mongoose";
+import { Schema, model, Types } from "mongoose";
 
-const ApplicationSchema = new Schema(
+export type ApplicationStatus =
+  | "submitted"
+  | "under_review"
+  | "accepted"
+  | "rejected"
+  | "cancelled";
+
+export interface IApplication {
+  job_id: Types.ObjectId;
+  candidate_id: Types.ObjectId;
+  resume: string;
+  resume_text?: string;
+  cover_letter?: string;
+  message?: string;
+  contact_email: string;
+  contact_phone: string;
+  status: ApplicationStatus;
+  reviewed_at?: Date;
+  rejection_reason?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+const ApplicationSchema = new Schema<IApplication>(
   {
     job_id: {
       type: Schema.Types.ObjectId,
@@ -38,4 +61,4 @@ const ApplicationSchema = new Schema(
 
 ApplicationSchema.index({ job_id: 1, candidate_id: 1 }, { unique: true });
 
-export default model("Application", ApplicationSchema);
+export default model<IApplication>("Application", ApplicationSchema);

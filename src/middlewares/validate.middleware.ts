@@ -1,8 +1,9 @@
-import { z } from "zod";
+import { z, ZodType } from "zod";
+import { Request, Response, NextFunction } from "express";
 import AppError from "../error/AppError.js";
 
-export const validate = (schema) => {
-  return (req, res, next) => {
+export const validate = (schema: ZodType<any>) => {
+  return (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = schema.parse({
         body: req.body,
@@ -21,10 +22,10 @@ export const validate = (schema) => {
         Object.assign(req.cookies, result.cookies);
       }
       next();
-    } catch (error) {
+    } catch (error: any) {
       const message =
         error.issues
-          ?.map((c) => `${c.path.join(":")} : ${c.message}`)
+          ?.map((c: any) => `${c.path.join(":")} : ${c.message}`)
           .join(",") ||
         error.message ||
         "Validation error";

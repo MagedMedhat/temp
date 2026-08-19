@@ -1,6 +1,13 @@
 import { Schema, model } from "mongoose";
 
-const CategorySchema = new Schema(
+export interface ICategory {
+  name: string;
+  description?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+const CategorySchema = new Schema<ICategory>(
   {
     name: { type: String, required: true, trim: true, unique: true },
     description: { type: String, trim: true },
@@ -8,4 +15,4 @@ const CategorySchema = new Schema(
   { timestamps: true, versionKey: false },
 );
 
-export default model("Category", CategorySchema);
+export default model<ICategory>("Category", CategorySchema);

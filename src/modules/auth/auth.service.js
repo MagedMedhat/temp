@@ -4,36 +4,24 @@ import Specialty from "../../models/specialty.model.js";
 import Session from "../../models/session.model.js";
 
 import AppError from "../../error/AppError.js";
-import verificationCodeModel from "../../models/verificationCode.model.js";
 import {
   generateAccessToken,
   generateSecurityToken,
   hashToken,
 } from "../../utils/jwt.js";
 import { dummyHash, TOKEN_EXPIRATION } from "./auth.constants.js";
+
 const register = async ({ data }) => {
-  
   const hashedPassword = await bcrypt.hash(data.password, 12);
 
-  const { rawToken, hashedToken } = generateSecurityToken();
-
-  console.log(rawToken, hashedToken);
-
   try {
-    const user = await User.create({ ...data, password: hashedPassword });
-
-    const userToken = await verificationCodeModel.create({
-      user_id: user._id,
-      type: "email_verification",
-      token: hashedToken,
-      expires_at: new Date(Date.now() + 10 * 60 * 1000),
-    });
+    await User.create({ ...data, password: hashedPassword });
   } catch (error) {
     if (error?.code === 11000) throw new AppError("Email already exists", 409);
     throw error;
   }
   return {
-    message: "User registered successfully. Please verify your email.",
+    message: "User registered successfully.",
   };
 };
 
@@ -45,7 +33,6 @@ const login = async ({ data }) => {
   const isMatch = await bcrypt.compare(password, user?.password || dummyHash);
 
   if (!user || !isMatch) throw new AppError("Invalid email or password", 401);
-
 
   if (user.is_blocked)
     throw new AppError("Your account has been blocked.", 403);
@@ -107,9 +94,6 @@ const refreshToken = async ({ refreshToken }) => {
 
   if (!user) throw new AppError("User not found", 404);
 
-  if (!user.is_verified)
-    throw new AppError("Please verify your email first.", 403);
-
   if (user.is_blocked)
     throw new AppError("Your account has been blocked.", 403);
 
@@ -139,4 +123,4 @@ const refreshToken = async ({ refreshToken }) => {
     },
   };
 };
-export { register, verifyEmail, login, logout, refreshToken };
+export { register, login, logout, refreshToken };

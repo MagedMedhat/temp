@@ -24,7 +24,6 @@ export const authMiddleware = async (req, res, next) => {
       session.expires_at <= new Date() ||
       !session.user_id ||
       session.user_id.is_blocked ||
-      !session.user_id.is_verified ||
       session.user_id._id.toString() !== decoded.userId
     )
       return res.status(401).json({

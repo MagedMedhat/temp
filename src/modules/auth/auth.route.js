@@ -4,7 +4,6 @@ import { validate } from "../../middlewares/validate.middleware.js";
 import {
   refreshTokenSchema,
   registerSchema,
-  verifyEmailSchema,
 } from "./auth.validation.js";
 import { authMiddleware } from "../../middlewares/auth.middleware.js";
 const router = express.Router();

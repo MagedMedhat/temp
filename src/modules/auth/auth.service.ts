@@ -14,12 +14,45 @@ import type { RegisterInput } from "./auth.validation.js";
 const register = async ({ data }: { data: RegisterInput }) => {
   const hashedPassword = await bcrypt.hash(data.password, 12);
 
+  const userData: any = {
+    name: data.name,
+    email: data.email,
+    password: hashedPassword,
+    role: data.role,
+    is_blocked: false,
+  };
+
+
+  if (data.role === "employer") {
+    userData.employerProfile = {
+      company_name: "New Company", 
+      company_logo: "",
+      description: "",
+      industry: "",
+      website: "",
+    };
+  }
+
+
+  if (data.role === "candidate") {
+    userData.candidateProfile = {
+      headline: "",
+      bio: "",
+      location: "",
+      portfolio_url: "",
+      resume: "",
+      skills: [],
+      experience_level: "entry",
+    };
+  }
+
   try {
-    await User.create({ ...data, password: hashedPassword } as any);
+    await User.create(userData);
   } catch (error: any) {
     if (error?.code === 11000) throw new AppError("Email already exists", 409);
     throw error;
   }
+
   return {
     message: "User registered successfully.",
   };

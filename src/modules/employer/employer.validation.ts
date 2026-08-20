@@ -1,0 +1,12 @@
+import { z } from 'zod';
+
+export const updateEmployerProfileSchema = z.object({
+  body: z.object({
+    companyName: z.string().min(2, 'Company name must be at least 2 characters').optional(),
+    description: z.string().optional().nullable(),
+    industry: z.string().optional().nullable(),
+    website: z.string().url('Must be a valid URL').optional().nullable(),
+  }),
+});
+
+export type UpdateEmployerProfileBody = z.infer<typeof updateEmployerProfileSchema>['body'];

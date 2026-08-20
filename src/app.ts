@@ -7,11 +7,15 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
+app.use('/uploads', express.static('uploads'));
+
 import healthRoutes from "./modules/health/health.route.js";
 import authRoutes from "./modules/auth/auth.route.js";
+import employerRouter from "./modules/employer/employer.route.js"; 
 
 app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/employer", employerRouter); 
 
 app.use(errorHandler);
 export default app;

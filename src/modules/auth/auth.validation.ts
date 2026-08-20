@@ -9,7 +9,8 @@ const objectId = z
 
 const phoneRegex = /^(\+20|0)?1[0125][0-9]{8}$/;
 
-const doctorBody = z
+
+const employerBody = z
   .object({
     name: z
       .string({ error: "Name is required" })
@@ -26,29 +27,14 @@ const doctorBody = z
       .string({ error: "Password is required" })
       .min(6, "Password must be at least 6 characters"),
 
-    role: z.literal("doctor"),
+    role: z.literal("employer"),
 
-    contact_number: z
-      .string({ error: "Contact number is required" })
-      .regex(phoneRegex, "Invalid phone number"),
 
-    doctorProfile: z.object({
-      specialty_id: objectId,
-
-      price: z
-        .number({ error: "Price is required" })
-        .min(0, "Price cannot be negative"),
-
-      bio: z
-        .string()
-        .trim()
-        .max(1000, "Bio cannot exceed 1000 characters")
-        .optional(),
-    }),
   })
   .strict();
 
-const patientBody = z
+
+const candidateBody = z
   .object({
     name: z
       .string({ error: "Name is required" })
@@ -65,28 +51,39 @@ const patientBody = z
       .string({ error: "Password is required" })
       .min(6, "Password must be at least 6 characters"),
 
-    role: z.literal("patient"),
+    role: z.literal("candidate"),
 
-    contact_number: z
-      .string({ error: "Contact number is required" })
-      .regex(phoneRegex, "Invalid phone number"),
 
-    patientProfile: z.object({
-      date_of_birth: z
-        .string({ error: "Date of birth is required" })
-        .datetime("Invalid date of birth"),
-
-      address: z
-        .string({ error: "Address is required" })
-        .trim()
-        .min(3, "Address is too short"),
-    }),
   })
   .strict();
+
+
+const adminBody = z
+  .object({
+    name: z
+      .string({ error: "Name is required" })
+      .trim()
+      .min(3, "Name must be at least 3 characters"),
+
+    email: z
+      .string({ error: "Email is required" })
+      .trim()
+      .toLowerCase()
+      .email("Invalid email address"),
+
+    password: z
+      .string({ error: "Password is required" })
+      .min(6, "Password must be at least 6 characters"),
+
+    role: z.literal("admin"),
+  })
+  .strict();
+
 
 export const registerSchema = z.object({
-  body: z.discriminatedUnion("role", [doctorBody, patientBody]),
+  body: z.discriminatedUnion("role", [employerBody, candidateBody, adminBody]),
 });
+
 
 export const verifyEmailSchema = z.object({
   body: z.object({
@@ -97,6 +94,7 @@ export const verifyEmailSchema = z.object({
   }),
 });
 
+
 export const refreshTokenSchema = z.object({
   cookies: z.object({
     refreshToken: z
@@ -105,6 +103,7 @@ export const refreshTokenSchema = z.object({
       .max(100, "Invalid refresh token"),
   }),
 });
+
 
 export type RegisterInput = z.infer<typeof registerSchema>["body"];
 export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>["body"];

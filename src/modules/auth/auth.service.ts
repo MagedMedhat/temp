@@ -22,17 +22,15 @@ const register = async ({ data }: { data: RegisterInput }) => {
     is_blocked: false,
   };
 
-
   if (data.role === "employer") {
     userData.employerProfile = {
-      company_name: "New Company", 
+      company_name: "New Company",
       company_logo: "",
       description: "",
       industry: "",
       website: "",
     };
   }
-
 
   if (data.role === "candidate") {
     userData.candidateProfile = {
